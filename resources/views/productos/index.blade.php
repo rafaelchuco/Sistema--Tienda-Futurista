@@ -1,5 +1,6 @@
 @extends('layouts.layout')
 
+
 @section('title', 'NEXUS | Base de Datos')
 @section('header', 'BASE DE DATOS DE PRODUCTOS')
 @section('description', 'Centro de control y monitoreo de inventario avanzado')
@@ -318,13 +319,16 @@
     <!-- Paginación holográfica -->
     <div class="holo-pagination">
         <div class="pagination-info">
-            <span class="info-text">
-                MOSTRANDO {{ $productos->firstItem() }} - {{ $productos->lastItem() }} 
-                DE {{ $productos->total() }} ELEMENTOS
-            </span>
+            <div class="info-text">
+                <span class="range">{{ $productos->firstItem() }} - {{ $productos->lastItem() }}</span>
+                <span class="total">DE {{ number_format($productos->total()) }} ELEMENTOS</span>
+            </div>
         </div>
+        
+        <div class="pagination-separator"></div>
+        
         <div class="pagination-controls">
-            {{ $productos->links() }}
+            {{ $productos->appends(request()->query())->links() }}
         </div>
     </div>
 @else
@@ -771,78 +775,438 @@
     justify-content: center;
 }
 
-/* Paginación holográfica */
+/* Paginación holográfica REDISEÑADA */
 .holo-pagination {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    backdrop-filter: var(--blur-light);
-}
-
-.pagination-info .info-text {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Estado vacío */
-.cyber-empty-state {
-    background: var(--glass-bg);
-    backdrop-filter: var(--blur-medium);
-    border: 1px solid var(--glass-border);
-    border-radius: 25px;
-    padding: 4rem 2rem;
-    text-align: center;
+    margin-top: 3rem;
+    padding: 2.5rem 3rem;
+    background: linear-gradient(135deg, rgba(10, 10, 15, 0.95), rgba(15, 15, 25, 0.9));
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    border-radius: 30px;
+    backdrop-filter: blur(25px);
     position: relative;
     overflow: hidden;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.cyber-empty-state::before {
+.holo-pagination::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan));
+    height: 3px;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        var(--neon-cyan) 10%, 
+        var(--neon-purple) 30%, 
+        var(--neon-green) 70%, 
+        var(--neon-cyan) 90%, 
+        transparent
+    );
+    animation: holographic-flow 8s linear infinite;
 }
 
-.empty-icon {
-    margin-bottom: 2rem;
+.holo-pagination::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: radial-gradient(ellipse at center, var(--neon-cyan), transparent);
+    opacity: 0.6;
 }
 
-.empty-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--text-neon);
-    margin-bottom: 1rem;
+/* Información de paginación mejorada */
+.pagination-info {
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(138, 43, 226, 0.05));
+    padding: 1.5rem 2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 245, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+    min-width: 300px;
+}
+
+.pagination-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(0, 245, 255, 0.1), 
+        transparent
+    );
+    transition: left 0.8s ease;
+}
+
+.pagination-info:hover::before {
+    left: 100%;
+}
+
+.pagination-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 245, 255, 0.2);
+    border-color: rgba(0, 245, 255, 0.3);
+}
+
+.pagination-info .info-text {
+    color: var(--neon-cyan);
+    font-size: 1rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
+    font-family: 'Orbitron', monospace;
+    text-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+    position: relative;
+    z-index: 2;
+    line-height: 1.4;
 }
 
-.empty-description {
-    color: var(--text-dim);
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+.pagination-info .info-highlight {
+    color: var(--neon-green);
+    font-weight: 800;
+    font-size: 1.1em;
 }
 
-.empty-actions {
+/* Controles de paginación reorganizados */
+.pagination-controls {
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 1rem;
-    flex-wrap: wrap;
+}
+
+/* Personalización completa de paginación Bootstrap */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination .page-link {
+    background: rgba(15, 15, 25, 0.8) !important;
+    border: 1px solid rgba(0, 245, 255, 0.2) !important;
+    color: var(--text-neon) !important;
+    padding: 0.8rem 1.1rem;
+    border-radius: 15px !important;
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.8px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    min-width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto holográfico en hover */
+.pagination .page-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(0, 245, 255, 0.15), 
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(138, 43, 226, 0.1)) !important;
+    border-color: var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 10px 30px rgba(0, 245, 255, 0.3),
+        0 0 20px rgba(0, 245, 255, 0.2);
+    text-shadow: 0 0 15px var(--neon-cyan);
+}
+
+.pagination .page-link:hover::before {
+    left: 100%;
+}
+
+/* Página activa con estilo especial */
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--neon-cyan), rgba(0, 245, 255, 0.8)) !important;
+    border-color: var(--neon-cyan) !important;
+    color: var(--dark-void) !important;
+    box-shadow: 
+        0 0 30px rgba(0, 245, 255, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.2),
+        0 8px 25px rgba(0, 245, 255, 0.4);
+    font-weight: 900;
+    transform: scale(1.15);
+    z-index: 5;
+    text-shadow: none;
+    position: relative;
+}
+
+.pagination .page-item.active .page-link::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.7;
+    animation: active-pulse 2s ease-in-out infinite;
+}
+
+/* Estados deshabilitados */
+.pagination .page-item.disabled .page-link {
+    background: rgba(10, 10, 15, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.2) !important;
+    cursor: not-allowed;
+    opacity: 0.3;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    background: rgba(10, 10, 15, 0.4) !important;
+}
+
+/* Botones de navegación especiales (anterior/siguiente) */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(75, 0, 130, 0.1)) !important;
+    border-color: var(--neon-purple) !important;
+    color: var(--neon-purple) !important;
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    font-weight: 700;
+    width: 60px;
+}
+
+.pagination .page-item:first-child .page-link:hover,
+.pagination .page-item:last-child .page-link:hover {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.25), rgba(75, 0, 130, 0.2)) !important;
+    border-color: var(--neon-purple) !important;
+    color: var(--neon-purple) !important;
+    box-shadow: 
+        0 10px 30px rgba(138, 43, 226, 0.4),
+        0 0 25px rgba(138, 43, 226, 0.3);
+}
+
+/* Separador visual entre controles */
+.pagination-separator {
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--neon-cyan), transparent);
+    margin: 0 1rem;
+    opacity: 0.5;
+}
+
+/* Animaciones mejoradas */
+@keyframes holographic-flow {
+    0% { 
+        background-position: -200% 50%; 
+        opacity: 0.8;
+    }
+    50% { 
+        opacity: 1;
+    }
+    100% { 
+        background-position: 200% 50%; 
+        opacity: 0.8;
+    }
+}
+
+@keyframes active-pulse {
+    0%, 100% { 
+        opacity: 0.7; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.02);
+    }
+}
+
+/* Efectos adicionales para toda la paginación */
+.pagination-controls:hover {
+    transform: scale(1.02);
+    transition: transform 0.4s ease;
+}
+
+.pagination-controls:hover .pagination {
+    box-shadow: 0 15px 40px rgba(0, 245, 255, 0.15);
+}
+
+/* Responsive mejorado */
+@media (max-width: 768px) {
+    .holo-pagination {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .pagination-info {
+        order: 2;
+        width: 100%;
+        text-align: center;
+        min-width: auto;
+    }
+    
+    .pagination-controls {
+        order: 1;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.85rem;
+        min-width: 45px;
+        height: 45px;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        width: 50px;
+        padding: 0.7rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .holo-pagination {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        min-width: 40px;
+        height: 40px;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        width: 45px;
+        padding: 0.6rem 0.9rem;
+        font-size: 1rem;
+    }
+    
+    .pagination-info .info-text {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+}
+
+/* Mejora en la información de paginación */
+.info-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.info-text .range {
+    font-size: 1.2em;
+    color: var(--neon-green);
+}
+
+.info-text .total {
+    font-size: 0.9em;
+    color: var(--text-dim);
+}
+
+/* Responsive para paginación */
+@media (max-width: 768px) {
+    .holo-pagination {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        min-width: 40px;
+    }
+    
+    .pagination-info {
+        order: 2;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .pagination-controls {
+        order: 1;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination .page-link {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.75rem;
+        min-width: 35px;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        padding: 0.5rem 0.8rem;
+    }
 }
 
 /* Override para cualquier fondo blanco persistente */
@@ -855,69 +1219,11 @@
     background: transparent !important;
 }
 
-/* Responsive mejorado */
-@media (max-width: 768px) {
-    .table-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .holo-pagination {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .search-actions {
-        text-align: center;
-    }
-    
-    .empty-actions {
-        flex-direction: column;
-    }
-    
-    .action-group {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    /* Responsividad de tabla en móviles */
-    .holo-table {
-        font-size: 0.8rem;
-    }
-    
-    .holo-table thead th,
-    .holo-table tbody td {
-        padding: 1rem 0.5rem !important;
-    }
-}
-
-/* Animaciones adicionales */
-@keyframes scan {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-/* Personalización de paginación Bootstrap */
-.pagination .page-link {
-    background: var(--glass-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    color: var(--text-neon) !important;
-    margin: 0 2px;
-    border-radius: 8px;
-}
-
-.pagination .page-link:hover {
-    background: rgba(0, 245, 255, 0.1) !important;
-    border-color: var(--neon-cyan) !important;
-    color: var(--neon-cyan) !important;
-}
-
-.pagination .page-item.active .page-link {
-    background: var(--neon-cyan) !important;
-    border-color: var(--neon-cyan) !important;
-    color: var(--dark-void) !important;
-    box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+/* Animación de carga para cambio de página */
+.pagination-loading {
+    opacity: 0.5;
+    filter: blur(2px);
+    transition: all 0.3s ease;
 }
 
 /* Efectos adicionales para elementos específicos */
@@ -943,6 +1249,91 @@
 .holo-table thead th:hover {
     background: rgba(0, 245, 255, 0.15) !important;
     text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Personalización específica para el select de categorías */
+.holo-form-select {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur-medium);
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 15px !important;
+    color: var(--text-neon) !important;
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 1rem !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.holo-form-select:focus {
+    outline: none !important;
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3) !important;
+    background: rgba(10, 10, 15, 0.95) !important;
+}
+
+.holo-form-select:hover {
+    border-color: var(--neon-purple) !important;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.2) !important;
+}
+
+/* Personalización específica para las opciones del select */
+.holo-form-select option {
+    background: rgba(10, 10, 15, 0.95) !important;
+    color: var(--text-neon) !important;
+    font-family: 'Orbitron', monospace;
+    font-weight: 600;
+    padding: 0.8rem !important;
+    border: none !important;
+}
+
+/* Estilo especial para la opción "TODAS LAS CATEGORÍAS" */
+.holo-form-select option[value=""] {
+    background: rgba(15, 15, 25, 0.98) !important;
+    color: rgba(255, 255, 255, 0.4) !important; /* Tono oscuro/gris */
+    font-style: italic;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Alternativa con tono más oscuro */
+.holo-form-select option[value=""]:hover {
+    background: rgba(20, 20, 30, 0.95) !important;
+    color: rgba(255, 255, 255, 0.3) !important; /* Aún más oscuro en hover */
+}
+
+/* Para navegadores que soportan mejor personalización de select */
+.holo-form-select option:first-child {
+    background: linear-gradient(135deg, rgba(15, 15, 25, 0.98), rgba(10, 10, 20, 0.95)) !important;
+    color: rgba(200, 200, 200, 0.5) !important; /* Gris oscuro */
+    font-weight: 400;
+    text-shadow: none;
+    opacity: 0.7;
+}
+
+/* Estilo adicional para mejor contraste */
+.cyber-input-group .holo-form-select option[value=""] {
+    background: rgba(5, 5, 10, 0.9) !important;
+    color: #666666 !important; /* Color hexadecimal gris oscuro */
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+}
+
+/* Para navegadores webkit (Chrome, Safari) */
+.holo-form-select option:first-child {
+    color: #4a4a4a !important; /* Gris más oscuro */
+    background-color: rgba(8, 8, 12, 0.95) !important;
+}
+
+/* Para Firefox */
+@-moz-document url-prefix() {
+    .holo-form-select option[value=""] {
+        color: #555555 !important;
+        background: rgba(10, 10, 15, 0.9) !important;
+    }
 }
 </style>
 
@@ -988,6 +1379,53 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.filter = '';
         });
     });
+
+    // Efectos mejorados para paginación
+    const paginationLinks = document.querySelectorAll('.pagination .page-link');
+    paginationLinks.forEach(link => {
+        if (!link.closest('.page-item').classList.contains('disabled')) {
+            link.addEventListener('click', function(e) {
+                // Efecto de carga
+                const paginationContainer = document.querySelector('.holo-pagination');
+                if (paginationContainer) {
+                    paginationContainer.classList.add('pagination-loading');
+                    
+                    // Crear efecto de escaneo
+                    const scanner = document.createElement('div');
+                    scanner.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.3), transparent);
+                        animation: scan 1s ease-out;
+                        pointer-events: none;
+                        z-index: 10;
+                    `;
+                    paginationContainer.appendChild(scanner);
+                    
+                    setTimeout(() => {
+                        scanner.remove();
+                    }, 1000);
+                }
+            });
+        }
+    });
+
+    // Efectos de hover para información de paginación
+    const paginationInfo = document.querySelector('.pagination-info');
+    if (paginationInfo) {
+        paginationInfo.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+            this.style.boxShadow = '0 10px 30px rgba(0, 245, 255, 0.2)';
+        });
+        
+        paginationInfo.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+    }
 });
 
 function sortTable(column, direction) {

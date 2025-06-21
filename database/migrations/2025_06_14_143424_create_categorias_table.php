@@ -11,18 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('productos', function (Blueprint $table) {
-            $table->tinyInteger('estado')->default(1)->after('id_producto');
+        Schema::create('categorias', function (Blueprint $table) {
+            $table->id('id_categoria');
+            $table->string('descripcion', 100);
+            $table->boolean('estado')->default(1); // ← Aquí agregas el campo directamente
+            $table->timestamps();
         });
     }
+
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('productos', function (Blueprint $table) {
-            $table->dropColumn('estado');
-        });
+        Schema::dropIfExists('categorias');
     }
 };
